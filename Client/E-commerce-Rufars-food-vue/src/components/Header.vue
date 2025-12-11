@@ -27,15 +27,31 @@
             Shop
           </router-link>
           <router-link
-            to="/admin"
-            class="text-foreground hover:text-primary transition-colors duration-200 text-sm font-medium"
+            to="/help"
+            class="text-foreground hover:text-primary transition-colors duration-200 font-medium"
           >
-            Admin
+            Help & Support
           </router-link>
         </nav>
 
         <!-- Right Side Icons -->
         <div class="flex items-center gap-3">
+          <!-- Login & Signup Buttons - Desktop -->
+          <div class="hidden md:flex items-center gap-2">
+            <router-link
+              to="/login"
+              class="px-4 py-2 text-foreground hover:text-primary transition-colors font-medium"
+            >
+              Login
+            </router-link>
+            <router-link
+              to="/signup"
+              class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium"
+            >
+              Sign Up
+            </router-link>
+          </div>
+
           <!-- Search Icon - Mobile -->
           <button
             class="md:hidden p-2 text-foreground hover:text-primary transition-colors"
@@ -108,12 +124,30 @@
             Shop All Products
           </router-link>
           <router-link
-            to="/admin"
+            to="/help"
             class="text-foreground hover:text-primary transition-colors py-2 px-3 rounded-lg hover:bg-accent/10 font-medium"
             @click="isOpen = false"
           >
-            Admin Dashboard
+            Help & Support
           </router-link>
+          
+          <!-- Login & Signup - Mobile -->
+          <div class="flex flex-col gap-2 pt-3 border-t border-border mt-2">
+            <router-link
+              to="/login"
+              class="text-foreground hover:text-primary transition-colors py-2 px-3 rounded-lg hover:bg-accent/10 font-medium text-center"
+              @click="isOpen = false"
+            >
+              Login
+            </router-link>
+            <router-link
+              to="/signup"
+              class="bg-primary text-white py-2 px-3 rounded-lg hover:bg-primary/90 transition-colors font-medium text-center"
+              @click="isOpen = false"
+            >
+              Sign Up
+            </router-link>
+          </div>
         </div>
       </nav>
     </div>

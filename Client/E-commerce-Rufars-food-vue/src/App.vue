@@ -1,10 +1,10 @@
 <template>
   <div class="min-h-screen bg-background">
-    <Header v-if="!isAdmin" />
+    <Header v-if="!isAdmin && !isAuthPage" />
     <main>
       <router-view />
     </main>
-    <Footer v-if="!isAdmin" />
+    <Footer v-if="!isAdmin && !isHelp && !isAuthPage" />
   </div>
 </template>
 
@@ -29,8 +29,18 @@ export default {
       return route.path.startsWith('/admin')
     })
     
+    const isHelp = computed(() => {
+      return route.path === '/help'
+    })
+    
+    const isAuthPage = computed(() => {
+      return route.path === '/login' || route.path === '/signup'
+    })
+    
     return {
-      isAdmin
+      isAdmin,
+      isHelp,
+      isAuthPage
     }
   }
 }

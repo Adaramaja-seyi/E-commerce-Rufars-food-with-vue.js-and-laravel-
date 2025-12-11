@@ -1,7 +1,5 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <Header />
-    
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Profile Header -->
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
@@ -330,14 +328,10 @@
         </div>
       </div>
     </div>
-
-    <Footer />
   </div>
 </template>
 
 <script>
-import Header from '@/components/Header.vue'
-import Footer from '@/components/Footer.vue'
 import {
   Camera,
   Phone,
@@ -355,8 +349,6 @@ export default {
   name: 'Profile',
   
   components: {
-    Header,
-    Footer,
     Camera,
     Phone,
     MapPin,

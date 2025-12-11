@@ -1,11 +1,12 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <Header />
-    
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <!-- Page Header -->
       <div class="text-center mb-12">
-        <h1 class="text-4xl font-bold text-gray-900 mb-4">Help & Support</h1>
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4">
+          <HelpCircle :size="32" class="text-primary" />
+        </div>
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">Help & Support Center</h1>
         <p class="text-lg text-gray-600 max-w-2xl mx-auto">
           We're here to help! Find answers to common questions or get in touch with our support team.
         </p>
@@ -24,36 +25,61 @@
         </div>
       </div>
 
+      <!-- Support Stats -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+        <div class="bg-white rounded-xl p-6 border border-gray-200 text-center">
+          <div class="text-3xl font-bold text-primary mb-1">24/7</div>
+          <div class="text-sm text-gray-600">Support Available</div>
+        </div>
+        <div class="bg-white rounded-xl p-6 border border-gray-200 text-center">
+          <div class="text-3xl font-bold text-primary mb-1">&lt;2h</div>
+          <div class="text-sm text-gray-600">Avg Response Time</div>
+        </div>
+        <div class="bg-white rounded-xl p-6 border border-gray-200 text-center">
+          <div class="text-3xl font-bold text-primary mb-1">98%</div>
+          <div class="text-sm text-gray-600">Customer Satisfaction</div>
+        </div>
+        <div class="bg-white rounded-xl p-6 border border-gray-200 text-center">
+          <div class="text-3xl font-bold text-primary mb-1">50k+</div>
+          <div class="text-sm text-gray-600">Issues Resolved</div>
+        </div>
+      </div>
+
       <!-- Quick Actions -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-        <div class="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-shadow cursor-pointer">
-          <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-            <MessageCircle :size="24" class="text-primary" />
+        <div class="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-all hover:border-primary cursor-pointer group">
+          <div class="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+            <MessageCircle :size="28" class="text-primary" />
           </div>
-          <h3 class="text-lg font-bold text-gray-900 mb-2">Live Chat</h3>
-          <p class="text-sm text-gray-600 mb-4">Chat with our support team in real-time</p>
-          <button class="text-primary font-medium text-sm hover:underline">Start Chat →</button>
+          <h3 class="text-lg font-bold text-gray-900 mb-2">Live Chat Support</h3>
+          <p class="text-sm text-gray-600 mb-4">Get instant help from our support team. Average response time under 2 minutes.</p>
+          <button class="text-primary font-semibold text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+            Start Chat 
+            <span>→</span>
+          </button>
         </div>
 
-        <div class="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-shadow cursor-pointer">
-          <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-            <Mail :size="24" class="text-primary" />
+        <div class="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-all hover:border-primary cursor-pointer group">
+          <div class="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+            <Mail :size="28" class="text-primary" />
           </div>
           <h3 class="text-lg font-bold text-gray-900 mb-2">Email Support</h3>
-          <p class="text-sm text-gray-600 mb-4">Send us an email and we'll respond within 24 hours</p>
-          <a href="mailto:support@rufarsfoods.com" class="text-primary font-medium text-sm hover:underline">
-            support@rufarsfoods.com →
+          <p class="text-sm text-gray-600 mb-4">Send us a detailed message. We respond within 24 hours, usually much faster.</p>
+          <a href="mailto:support@rufarsfoods.com" class="text-primary font-semibold text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+            support@rufarsfoods.com
+            <span>→</span>
           </a>
         </div>
 
-        <div class="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-shadow cursor-pointer">
-          <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-            <Phone :size="24" class="text-primary" />
+        <div class="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-all hover:border-primary cursor-pointer group">
+          <div class="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+            <Phone :size="28" class="text-primary" />
           </div>
           <h3 class="text-lg font-bold text-gray-900 mb-2">Phone Support</h3>
-          <p class="text-sm text-gray-600 mb-4">Call us Monday-Friday, 9AM-6PM EST</p>
-          <a href="tel:+15551234567" class="text-primary font-medium text-sm hover:underline">
-            +1 (555) 123-4567 →
+          <p class="text-sm text-gray-600 mb-4">Speak directly with our team. Available Monday-Friday, 9AM-6PM EST.</p>
+          <a href="tel:+15551234567" class="text-primary font-semibold text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+            +1 (555) 123-4567
+            <span>→</span>
           </a>
         </div>
       </div>
@@ -183,26 +209,47 @@
       </div>
 
       <!-- Additional Resources -->
-      <div class="mt-12 bg-primary/5 rounded-xl p-8 border border-primary/20">
-        <div class="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div>
-            <h3 class="text-xl font-bold text-gray-900 mb-2">Need Immediate Assistance?</h3>
-            <p class="text-gray-600">Our support team is available 24/7 to help you with urgent matters.</p>
-          </div>
-          <button class="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 font-medium whitespace-nowrap">
+      <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-gradient-to-br from-primary to-primary/80 rounded-xl p-8 text-white">
+          <h3 class="text-2xl font-bold mb-2">Need Immediate Help?</h3>
+          <p class="mb-6 opacity-90">Our support team is standing by 24/7 to assist you with urgent matters.</p>
+          <button class="px-6 py-3 bg-white text-primary rounded-lg hover:bg-gray-50 font-semibold transition-colors">
             Contact Support Now
           </button>
         </div>
+
+        <div class="bg-white rounded-xl p-8 border border-gray-200">
+          <h3 class="text-2xl font-bold text-gray-900 mb-2">Visit Our Knowledge Base</h3>
+          <p class="text-gray-600 mb-6">Browse hundreds of articles and guides to find solutions on your own.</p>
+          <button class="px-6 py-3 border-2 border-primary text-primary rounded-lg hover:bg-primary hover:text-white font-semibold transition-colors">
+            Browse Articles
+          </button>
+        </div>
+      </div>
+
+      <!-- Business Hours -->
+      <div class="mt-12 bg-white rounded-xl p-8 border border-gray-200">
+        <h3 class="text-xl font-bold text-gray-900 mb-6 text-center">Support Hours</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+          <div>
+            <div class="text-sm font-medium text-gray-600 mb-2">Live Chat</div>
+            <div class="text-lg font-bold text-gray-900">24/7 Available</div>
+          </div>
+          <div>
+            <div class="text-sm font-medium text-gray-600 mb-2">Phone Support</div>
+            <div class="text-lg font-bold text-gray-900">Mon-Fri, 9AM-6PM EST</div>
+          </div>
+          <div>
+            <div class="text-sm font-medium text-gray-600 mb-2">Email Support</div>
+            <div class="text-lg font-bold text-gray-900">24/7 Available</div>
+          </div>
+        </div>
       </div>
     </div>
-
-    <Footer />
   </div>
 </template>
 
 <script>
-import Header from '@/components/Header.vue'
-import Footer from '@/components/Footer.vue'
 import {
   Search,
   MessageCircle,
@@ -221,8 +268,6 @@ export default {
   name: 'Help',
   
   components: {
-    Header,
-    Footer,
     Search,
     MessageCircle,
     Mail,

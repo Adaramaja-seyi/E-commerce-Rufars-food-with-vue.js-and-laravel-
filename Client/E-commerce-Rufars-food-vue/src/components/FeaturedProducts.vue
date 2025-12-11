@@ -11,7 +11,7 @@
         </p>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 mb-12">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8 mb-12">
         <ProductCard
           v-for="product in products"
           :key="product.id"
@@ -45,7 +45,7 @@ export default {
   
   data() {
     return {
-      products: products.slice(0, 4) // Show first 4 products as featured
+      products: products.slice(0, 12) // Show first 12 products as featured
     }
   }
 }

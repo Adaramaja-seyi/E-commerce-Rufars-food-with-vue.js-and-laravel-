@@ -8,6 +8,7 @@ import Admin from '../pages/Admin.vue'
 import Login from '../pages/Login.vue'
 import Signup from '../pages/Signup.vue'
 import Profile from '../pages/Profile.vue'
+import Help from '../pages/Help.vue'
 
 const routes = [
   {
@@ -54,6 +55,11 @@ const routes = [
     path: '/profile',
     name: 'Profile',
     component: Profile
+  },
+  {
+    path: '/help',
+    name: 'Help',
+    component: Help
   }
 ]
 
