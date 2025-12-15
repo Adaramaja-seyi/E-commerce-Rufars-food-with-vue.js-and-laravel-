@@ -113,7 +113,7 @@
         </div>
         
         <div class="mt-6 text-center">
-          <router-link to="/login" class="text-primary hover:text-primary/80">
+          <router-link :to="{name:'Login'}" class="text-primary hover:text-primary/80">
             Already have an account? Sign in
           </router-link>
         </div>
@@ -124,6 +124,8 @@
 
 <script>
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { useToast } from 'vue-toastification'
 import Button from '@/components/ui/Button.vue'
 
 export default {
@@ -146,7 +148,9 @@ export default {
   
   setup() {
     const router = useRouter()
-    return { router }
+    const authStore = useAuthStore()
+    const toast = useToast()
+    return { router, authStore, toast }
   },
   
   methods: {
@@ -155,65 +159,59 @@ export default {
       this.error = ''
       
       try {
-        // Simulate signup API call
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        
         // Basic validation
         if (!this.name || !this.email || !this.password) {
           this.error = 'Please fill in all fields'
+          this.toast.error('Please fill in all fields')
           this.loading = false
           return
         }
         
         if (this.password.length < 6) {
           this.error = 'Password must be at least 6 characters'
+          this.toast.error('Password must be at least 6 characters')
           this.loading = false
           return
         }
         
         if (this.password !== this.confirmPassword) {
           this.error = 'Passwords do not match'
+          this.toast.error('Passwords do not match')
           this.loading = false
           return
         }
         
-        // Store user info in localStorage (simple auth simulation)
-        localStorage.setItem('user', JSON.stringify({
+        // Call API
+        const result = await this.authStore.register({
           name: this.name,
           email: this.email,
-          loggedIn: true
-        }))
+          password: this.password,
+          password_confirmation: this.confirmPassword
+        })
         
-        // Redirect to checkout
-        this.router.push('/checkout')
+        if (result.success) {
+          // Show success toast
+          this.toast.success(result.message || 'Registration successful! Please login.')
+          
+          // Redirect to login page
+          setTimeout(() => {
+            this.router.push({ name: 'Login' })
+          }, 1500)
+        } else {
+          this.error = result.error || 'Signup failed. Please try again.'
+          this.toast.error(result.error || 'Signup failed. Please try again.')
+        }
       } catch (err) {
         this.error = 'Signup failed. Please try again.'
+        this.toast.error('Signup failed. Please try again.')
+      } finally {
         this.loading = false
       }
     },
     
-    async handleGoogleSignup() {
-      this.loading = true
-      this.error = ''
-      
-      try {
-        // Simulate Google OAuth
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        
-        // Store user info in localStorage
-        localStorage.setItem('user', JSON.stringify({
-          name: 'Google User',
-          email: 'user@gmail.com',
-          loggedIn: true,
-          provider: 'google'
-        }))
-        
-        // Redirect to checkout
-        this.router.push('/checkout')
-      } catch (err) {
-        this.error = 'Google signup failed. Please try again.'
-        this.loading = false
-      }
+    handleGoogleSignup() {
+      // Redirect to backend Google OAuth
+      window.location.href = 'http://127.0.0.1:8000/api/auth/google'
     }
   }
 }

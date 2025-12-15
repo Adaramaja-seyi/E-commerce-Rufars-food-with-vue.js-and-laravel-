@@ -95,7 +95,7 @@
         </div>
         
         <div class="mt-6 text-center">
-          <router-link to="/signup" class="text-primary hover:text-primary/80">
+          <router-link :to="{name:'Signup'}" class="text-primary hover:text-primary/80">
             Don't have an account? Sign up
           </router-link>
         </div>
@@ -106,7 +106,7 @@
     <div v-if="showForgotPassword" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div class="bg-white rounded-xl p-6 max-w-md w-full">
         <h3 class="text-xl font-bold text-gray-900 mb-4">Reset Password</h3>
-        <p class="text-gray-600 mb-4">Enter your email address and we'll send you a link to reset your password.</p>
+        <p class="text-gray-600 mb-4">Enter your email address and we'll send you a token to reset your password.</p>
         
         <form @submit.prevent="handleForgotPassword">
           <div class="mb-4">
@@ -121,7 +121,7 @@
           </div>
           
           <div v-if="resetSuccess" class="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-            <p class="text-green-600 text-sm">Password reset link sent! Check your email.</p>
+            <p class="text-green-600 text-sm">✅ Reset token sent! Check your email. A form will appear shortly.</p>
           </div>
           
           <div class="flex gap-3">
@@ -134,9 +134,73 @@
             </button>
             <button
               type="submit"
-              class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
+              :disabled="resetLoading"
+              class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Send Reset Link
+              {{ resetLoading ? 'Sending...' : 'Send Reset Token' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Reset Password Token Modal -->
+    <div v-if="showTokenModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-xl p-6 max-w-md w-full">
+        <h3 class="text-xl font-bold text-gray-900 mb-4">Enter Reset Token</h3>
+        <p class="text-gray-600 mb-4">Check your email for the reset token and enter it below along with your new password.</p>
+        
+        <form @submit.prevent="handleResetPassword">
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Reset Token</label>
+            <input
+              v-model="resetToken"
+              type="text"
+              required
+              maxlength="8"
+              class="w-full px-4 py-3 border-2 border-primary/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-mono text-2xl tracking-widest text-center uppercase"
+              placeholder="XXXXXXXX"
+              @input="resetToken = resetToken.toUpperCase()"
+            />
+            <p class="text-xs text-gray-500 mt-1 text-center">📧 Enter the 8-character token from your email</p>
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">New Password</label>
+            <input
+              v-model="newPassword"
+              type="password"
+              required
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              placeholder="Enter new password"
+            />
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+            <input
+              v-model="confirmPassword"
+              type="password"
+              required
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              placeholder="Confirm new password"
+            />
+          </div>
+          
+          <div class="flex gap-3">
+            <button
+              type="button"
+              @click="closeTokenModal"
+              class="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              :disabled="tokenLoading"
+              class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {{ tokenLoading ? 'Resetting...' : 'Reset Password' }}
             </button>
           </div>
         </form>
@@ -147,6 +211,8 @@
 
 <script>
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { useToast } from 'vue-toastification'
 import Button from '@/components/ui/Button.vue'
 
 export default {
@@ -164,13 +230,21 @@ export default {
       error: '',
       showForgotPassword: false,
       resetEmail: '',
-      resetSuccess: false
+      resetSuccess: false,
+      resetLoading: false,
+      showTokenModal: false,
+      resetToken: '',
+      newPassword: '',
+      confirmPassword: '',
+      tokenLoading: false
     }
   },
   
   setup() {
     const router = useRouter()
-    return { router }
+    const authStore = useAuthStore()
+    const toast = useToast()
+    return { router, authStore, toast }
   },
   
   methods: {
@@ -179,68 +253,146 @@ export default {
       this.error = ''
       
       try {
-        // Simulate login API call
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        
         // Basic validation
         if (!this.email || !this.password) {
           this.error = 'Please fill in all fields'
+          this.toast.error('Please fill in all fields')
           this.loading = false
           return
         }
         
-        // Store user info in localStorage (simple auth simulation)
-        localStorage.setItem('user', JSON.stringify({
+        // Call API
+        const result = await this.authStore.login({
           email: this.email,
-          loggedIn: true
-        }))
+          password: this.password
+        })
         
-        // Redirect to checkout
-        this.router.push('/checkout')
+        if (result.success) {
+          // Show success toast
+          this.toast.success(`Welcome back, ${result.user.name}!`)
+          
+          // Import cart store dynamically
+          const { useCartStore } = await import('@/stores/cart')
+          const cartStore = useCartStore()
+          
+          // Sync guest cart and fetch user cart
+          await cartStore.syncGuestCart()
+          await cartStore.fetchCart()
+          
+          // Role-based redirect
+          if (result.isAdmin) {
+            // Admin goes to admin dashboard
+            this.router.push('/admin/dashboard')
+          } else {
+            // User goes to intended page, profile, or home
+            const redirect = this.$route.query.redirect
+            if (redirect) {
+              this.router.push(redirect)
+            } else if (redirect === '/checkout') {
+              this.router.push('/checkout')
+            } else {
+              this.router.push('/profile')
+            }
+          }
+        } else {
+          this.error = result.error || 'Login failed. Please try again.'
+          this.toast.error(result.error || 'Login failed. Please try again.')
+        }
       } catch (err) {
         this.error = 'Login failed. Please try again.'
+        this.toast.error('Login failed. Please try again.')
+      } finally {
         this.loading = false
       }
     },
     
-    async handleGoogleLogin() {
-      this.loading = true
-      this.error = ''
-      
-      try {
-        // Simulate Google OAuth
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        
-        // Store user info in localStorage
-        localStorage.setItem('user', JSON.stringify({
-          email: 'user@gmail.com',
-          loggedIn: true,
-          provider: 'google'
-        }))
-        
-        // Redirect to checkout
-        this.router.push('/checkout')
-      } catch (err) {
-        this.error = 'Google login failed. Please try again.'
-        this.loading = false
-      }
+    handleGoogleLogin() {
+      // Redirect to backend Google OAuth
+      window.location.href = 'http://127.0.0.1:8000/api/auth/google'
     },
     
     async handleForgotPassword() {
+      if (!this.resetEmail) {
+        this.error = 'Please enter your email'
+        this.toast.error('Please enter your email')
+        return
+      }
+
+      this.resetLoading = true
+
       try {
-        // Simulate password reset API call
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        this.resetSuccess = true
+        const result = await this.authStore.forgotPassword(this.resetEmail)
         
-        // Auto close after 3 seconds
-        setTimeout(() => {
-          this.showForgotPassword = false
-          this.resetEmail = ''
-          this.resetSuccess = false
-        }, 3000)
+        if (result.success) {
+          this.resetSuccess = true
+          this.toast.success('Reset token sent! Check your email and enter the token below.')
+          
+          // Show token modal after 2 seconds
+          setTimeout(() => {
+            this.showForgotPassword = false
+            this.showTokenModal = true
+            this.resetSuccess = false
+          }, 2000)
+        } else {
+          this.error = result.error
+          this.toast.error(result.error)
+        }
       } catch (err) {
         this.error = 'Failed to send reset link. Please try again.'
+        this.toast.error('Failed to send reset link. Please try again.')
+      } finally {
+        this.resetLoading = false
       }
+    },
+
+    async handleResetPassword() {
+      if (!this.resetToken || !this.newPassword || !this.confirmPassword) {
+        this.toast.error('Please fill in all fields')
+        return
+      }
+
+      if (this.newPassword !== this.confirmPassword) {
+        this.toast.error('Passwords do not match')
+        return
+      }
+
+      if (this.newPassword.length < 6) {
+        this.toast.error('Password must be at least 6 characters')
+        return
+      }
+
+      this.tokenLoading = true
+
+      try {
+        const response = await this.authStore.resetPassword({
+          email: this.resetEmail,
+          token: this.resetToken,
+          password: this.newPassword,
+          password_confirmation: this.confirmPassword
+        })
+
+        if (response.success) {
+          this.toast.success('Password reset successfully! You can now login.')
+          this.showTokenModal = false
+          this.resetEmail = ''
+          this.resetToken = ''
+          this.newPassword = ''
+          this.confirmPassword = ''
+        } else {
+          this.toast.error(response.error || 'Failed to reset password')
+        }
+      } catch (err) {
+        this.toast.error('Failed to reset password. Please try again.')
+      } finally {
+        this.tokenLoading = false
+      }
+    },
+
+    closeTokenModal() {
+      this.showTokenModal = false
+      this.resetToken = ''
+      this.newPassword = ''
+      this.confirmPassword = ''
     }
   }
 }

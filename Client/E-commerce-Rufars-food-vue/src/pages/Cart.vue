@@ -141,11 +141,12 @@
             </div>
 
             <div class="space-y-3">
-              <router-link to="/signup" class="w-full">
-                <Button class="w-full bg-primary hover:bg-primary/90 text-white rounded-xl py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300">
-                  Proceed to Checkout
-                </Button>
-              </router-link>
+              <Button 
+                @click="proceedToCheckout"
+                class="w-full bg-primary hover:bg-primary/90 text-white rounded-xl py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                Proceed to Checkout
+              </Button>
               <router-link to="/products" class="w-full">
                 <Button
                   variant="outline"
@@ -176,6 +177,8 @@
 import { Trash2, Plus, Minus, ArrowLeft, ShoppingBag } from 'lucide-vue-next'
 import Button from '@/components/ui/Button.vue'
 import { useCartStore } from '@/stores/cart'
+import { useAuthStore } from '@/stores/auth'
+import { useToast } from 'vue-toastification'
 
 export default {
   name: 'Cart',
@@ -221,6 +224,27 @@ export default {
     updateQuantity(id, quantity) {
       const cartStore = useCartStore()
       cartStore.updateQuantity(id, quantity)
+    },
+    
+    proceedToCheckout() {
+      const authStore = useAuthStore()
+      const toast = useToast()
+      
+      // Check if cart is empty
+      if (this.items.length === 0) {
+        toast.error('Your cart is empty')
+        return
+      }
+      
+      // Check if user is authenticated
+      if (!authStore.isAuthenticated) {
+        toast.info('Please login to proceed to checkout')
+        this.$router.push({ name: 'Login', query: { redirect: '/checkout' } })
+        return
+      }
+      
+      // Proceed to checkout
+      this.$router.push({ name: 'Checkout' })
     }
   }
 }

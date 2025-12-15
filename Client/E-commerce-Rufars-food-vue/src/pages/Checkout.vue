@@ -460,23 +460,101 @@ export default {
     }
   },
   
+  async mounted() {
+    // Pre-fill form with user data if logged in
+    const { useAuthStore } = await import('@/stores/auth')
+    const authStore = useAuthStore()
+    
+    // Fetch latest user data from server
+    if (authStore.isAuthenticated) {
+      await authStore.fetchUser()
+      
+      if (authStore.user) {
+        this.formData.firstName = authStore.user.name?.split(' ')[0] || ''
+        this.formData.lastName = authStore.user.name?.split(' ').slice(1).join(' ') || ''
+        this.formData.email = authStore.user.email || ''
+        this.formData.phone = authStore.user.phone || ''
+        this.formData.address = authStore.user.address || ''
+        this.formData.city = authStore.user.city || ''
+        this.formData.state = authStore.user.state || ''
+        this.formData.pincode = authStore.user.pincode || ''
+      }
+    }
+  },
+  
   methods: {
     async handleSubmit() {
+      const { useToast } = await import('vue-toastification')
+      const { useAuthStore } = await import('@/stores/auth')
+      const { ordersAPI } = await import('@/api')
+      const toast = useToast()
+      const authStore = useAuthStore()
+      
       this.isProcessing = true
       
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 3000))
-      
-      // Generate order ID
-      this.orderId = Date.now().toString().slice(-8)
-      
-      // Clear cart
-      const cartStore = useCartStore()
-      cartStore.clearCart()
-      
-      // Show success
-      this.orderPlaced = true
-      this.isProcessing = false
+      try {
+        // Validate form
+        if (!this.formData.firstName || !this.formData.lastName || !this.formData.email || 
+            !this.formData.phone || !this.formData.address || !this.formData.city || 
+            !this.formData.state || !this.formData.pincode) {
+          toast.error('Please fill in all required fields')
+          this.isProcessing = false
+          return
+        }
+        
+        toast.info('Processing payment...')
+        
+        // Update user profile with shipping information
+        if (authStore.isAuthenticated) {
+          const profileData = {
+            name: `${this.formData.firstName} ${this.formData.lastName}`,
+            email: this.formData.email,
+            phone: this.formData.phone,
+            address: this.formData.address,
+            city: this.formData.city,
+            state: this.formData.state,
+            pincode: this.formData.pincode
+          }
+          
+          await authStore.updateProfile(profileData)
+        }
+        
+        // Create order
+        const orderData = {
+          shipping_address: {
+            name: `${this.formData.firstName} ${this.formData.lastName}`,
+            email: this.formData.email,
+            phone: this.formData.phone,
+            address: this.formData.address,
+            city: this.formData.city,
+            state: this.formData.state,
+            pincode: this.formData.pincode
+          },
+          payment_method: this.paymentMethod,
+          notes: ''
+        }
+        
+        const response = await ordersAPI.create(orderData)
+        
+        if (response.data.success) {
+          this.orderId = response.data.data.id
+          
+          // Clear cart
+          const cartStore = useCartStore()
+          await cartStore.clearCart()
+          
+          // Show success
+          this.orderPlaced = true
+          toast.success('Order placed successfully!')
+        } else {
+          toast.error(response.data.message || 'Failed to create order')
+        }
+      } catch (error) {
+        console.error('Checkout error:', error)
+        toast.error(error.response?.data?.message || 'Failed to process order. Please try again.')
+      } finally {
+        this.isProcessing = false
+      }
     }
   }
 }

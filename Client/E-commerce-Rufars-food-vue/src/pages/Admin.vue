@@ -357,31 +357,32 @@
             </div>
           </div>
 
-          <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <!-- Desktop Table View -->
+          <div class="hidden lg:block bg-white rounded-xl border border-gray-200 overflow-hidden">
             <div class="overflow-x-auto">
-              <table class="w-full">
+              <table class="w-full min-w-full">
                 <thead class="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">SKU</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Product</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">SKU</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Price</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Stock</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
                   <tr v-for="product in filteredProducts" :key="product.id" class="hover:bg-gray-50">
-                    <td class="px-6 py-4">
+                    <td class="px-6 py-4 whitespace-nowrap">
                       <div class="flex items-center gap-3">
-                        <img :src="product.image" :alt="product.name" class="w-10 h-10 rounded-lg object-cover" />
+                        <img :src="product.image" :alt="product.name" class="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
                         <span class="font-medium text-gray-900">{{ product.name }}</span>
                       </div>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-600">{{ product.sku }}</td>
-                    <td class="px-6 py-4 text-sm text-gray-900">₹{{ product.price }}</td>
-                    <td class="px-6 py-4 text-sm text-gray-900">{{ product.stock }}</td>
-                    <td class="px-6 py-4">
+                    <td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">{{ product.sku }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">₹{{ product.price }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">{{ product.stock }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
                       <span
                         :class="[
                           'px-2 py-1 text-xs rounded-full',
@@ -391,7 +392,7 @@
                         {{ product.status }}
                       </span>
                     </td>
-                    <td class="px-6 py-4">
+                    <td class="px-6 py-4 whitespace-nowrap">
                       <div class="flex items-center gap-2">
                         <button
                           @click="editProduct(product)"
@@ -412,6 +413,57 @@
                   </tr>
                 </tbody>
               </table>
+            </div>
+          </div>
+
+          <!-- Mobile Card View -->
+          <div class="lg:hidden space-y-4">
+            <div
+              v-for="product in filteredProducts"
+              :key="product.id"
+              class="bg-white rounded-xl p-4 border border-gray-200"
+            >
+              <div class="flex items-start gap-3 mb-3">
+                <img :src="product.image" :alt="product.name" class="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
+                <div class="flex-1 min-w-0">
+                  <h3 class="font-medium text-gray-900 mb-1">{{ product.name }}</h3>
+                  <p class="text-sm text-gray-600">{{ product.sku }}</p>
+                </div>
+                <span
+                  :class="[
+                    'px-2 py-1 text-xs rounded-full flex-shrink-0',
+                    product.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                  ]"
+                >
+                  {{ product.status }}
+                </span>
+              </div>
+              <div class="grid grid-cols-2 gap-3 mb-3 text-sm">
+                <div>
+                  <span class="text-gray-600">Price:</span>
+                  <span class="font-semibold text-gray-900 ml-1">₹{{ product.price }}</span>
+                </div>
+                <div>
+                  <span class="text-gray-600">Stock:</span>
+                  <span class="font-semibold text-gray-900 ml-1">{{ product.stock }}</span>
+                </div>
+              </div>
+              <div class="flex gap-2 pt-3 border-t border-gray-200">
+                <button
+                  @click="editProduct(product)"
+                  class="flex-1 px-3 py-2 text-sm text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors flex items-center justify-center gap-2"
+                >
+                  <Edit2 :size="16" />
+                  Edit
+                </button>
+                <button
+                  @click="deleteProduct(product.id)"
+                  class="flex-1 px-3 py-2 text-sm text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors flex items-center justify-center gap-2"
+                >
+                  <Trash2 :size="16" />
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
 
@@ -580,31 +632,32 @@
             </div>
           </div>
 
-          <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <!-- Desktop Table View -->
+          <div class="hidden lg:block bg-white rounded-xl border border-gray-200 overflow-hidden">
             <div class="overflow-x-auto">
-              <table class="w-full">
+              <table class="w-full min-w-full">
                 <thead class="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order #</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Order #</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Customer</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Date</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Total</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
                   <tr v-for="order in filteredOrders" :key="order.id" class="hover:bg-gray-50">
-                    <td class="px-6 py-4 font-medium text-gray-900">{{ order.orderNumber }}</td>
-                    <td class="px-6 py-4">
+                    <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">{{ order.orderNumber }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
                       <div>
                         <p class="text-sm font-medium text-gray-900">{{ order.customer.name }}</p>
                         <p class="text-xs text-gray-600">{{ order.customer.email }}</p>
                       </div>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-600">{{ formatDate(order.createdAt) }}</td>
-                    <td class="px-6 py-4 text-sm font-semibold text-gray-900">₹{{ order.total.toFixed(2) }}</td>
-                    <td class="px-6 py-4">
+                    <td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">{{ formatDate(order.createdAt) }}</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-900 whitespace-nowrap">₹{{ order.total.toFixed(2) }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
                       <span
                         :class="[
                           'px-2 py-1 text-xs rounded-full',
@@ -617,7 +670,7 @@
                         {{ order.status }}
                       </span>
                     </td>
-                    <td class="px-6 py-4">
+                    <td class="px-6 py-4 whitespace-nowrap">
                       <button
                         @click="viewOrder(order)"
                         class="px-3 py-1.5 text-sm text-primary hover:bg-primary/10 rounded-lg transition-colors flex items-center gap-1.5 font-medium"
@@ -630,6 +683,51 @@
                   </tr>
                 </tbody>
               </table>
+            </div>
+          </div>
+
+          <!-- Mobile Card View -->
+          <div class="lg:hidden space-y-4">
+            <div
+              v-for="order in filteredOrders"
+              :key="order.id"
+              class="bg-white rounded-xl p-4 border border-gray-200"
+            >
+              <div class="flex items-start justify-between mb-3">
+                <div>
+                  <h3 class="font-medium text-gray-900 mb-1">{{ order.orderNumber }}</h3>
+                  <p class="text-sm text-gray-600">{{ order.customer.name }}</p>
+                  <p class="text-xs text-gray-500">{{ order.customer.email }}</p>
+                </div>
+                <span
+                  :class="[
+                    'px-2 py-1 text-xs rounded-full flex-shrink-0',
+                    order.status === 'delivered' ? 'bg-green-100 text-green-700' :
+                    order.status === 'shipped' ? 'bg-blue-100 text-blue-700' :
+                    order.status === 'processing' ? 'bg-yellow-100 text-yellow-700' :
+                    'bg-gray-100 text-gray-700'
+                  ]"
+                >
+                  {{ order.status }}
+                </span>
+              </div>
+              <div class="grid grid-cols-2 gap-3 mb-3 text-sm">
+                <div>
+                  <span class="text-gray-600">Date:</span>
+                  <span class="text-gray-900 ml-1">{{ formatDate(order.createdAt) }}</span>
+                </div>
+                <div>
+                  <span class="text-gray-600">Total:</span>
+                  <span class="font-semibold text-gray-900 ml-1">₹{{ order.total.toFixed(2) }}</span>
+                </div>
+              </div>
+              <button
+                @click="viewOrder(order)"
+                class="w-full px-3 py-2 text-sm text-primary bg-primary/10 hover:bg-primary/20 rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <Eye :size="16" />
+                View Details
+              </button>
             </div>
           </div>
 
@@ -731,16 +829,16 @@
 
         <!-- Customers View -->
         <div v-else-if="activeTab === 'customers'" class="space-y-6">
-          <div class="flex items-center justify-between">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <h2 class="text-2xl font-bold text-gray-900">Customers</h2>
-            <div class="flex gap-3">
+            <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
               <input
                 v-model="customerSearch"
                 type="text"
                 placeholder="Search customers..."
-                class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
+                class="w-full sm:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
-              <button class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
+              <button class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 whitespace-nowrap">
                 Export
               </button>
             </div>
@@ -762,54 +860,54 @@
             </div>
           </div>
 
-          <!-- Customers Table -->
-          <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <!-- Desktop Table View -->
+          <div class="hidden lg:block bg-white rounded-xl border border-gray-200 overflow-hidden">
             <div class="overflow-x-auto">
-              <table class="w-full">
+              <table class="w-full min-w-full">
                 <thead class="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contact</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Location</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Orders</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Join Date</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Customer</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Contact</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Location</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Orders</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Join Date</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
                   <tr v-for="customer in filteredCustomers" :key="customer.id" class="hover:bg-gray-50">
-                    <td class="px-6 py-4">
+                    <td class="px-6 py-4 whitespace-nowrap">
                       <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                        <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
                           <span class="text-sm font-semibold text-primary">{{ customer.name.charAt(0) }}</span>
                         </div>
                         <span class="font-medium text-gray-900">{{ customer.name }}</span>
                       </div>
                     </td>
-                    <td class="px-6 py-4">
+                    <td class="px-6 py-4 whitespace-nowrap">
                       <div class="space-y-1">
                         <div class="flex items-center gap-2 text-sm text-gray-600">
-                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                           </svg>
                           <span>{{ customer.email }}</span>
                         </div>
                         <div class="flex items-center gap-2 text-sm text-gray-600">
-                          <Phone :size="14" />
+                          <Phone :size="14" class="flex-shrink-0" />
                           <span>{{ customer.phone }}</span>
                         </div>
                       </div>
                     </td>
-                    <td class="px-6 py-4">
+                    <td class="px-6 py-4 whitespace-nowrap">
                       <div class="flex items-center gap-2 text-sm text-gray-600">
-                        <MapPin :size="14" />
+                        <MapPin :size="14" class="flex-shrink-0" />
                         <span>{{ customer.location }}</span>
                       </div>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-900">{{ customer.orders }}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">{{ formatDate(customer.joinDate) }}</td>
-                    <td class="px-6 py-4">
+                    <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">{{ customer.orders }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">{{ formatDate(customer.joinDate) }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
                       <span
                         :class="[
                           'px-2 py-1 text-xs rounded-full',
@@ -819,7 +917,7 @@
                         {{ customer.status }}
                       </span>
                     </td>
-                    <td class="px-6 py-4">
+                    <td class="px-6 py-4 whitespace-nowrap">
                       <div class="relative">
                         <button
                           @click="toggleCustomerActions(customer.id)"
@@ -867,6 +965,101 @@
                   </tr>
                 </tbody>
               </table>
+            </div>
+          </div>
+
+          <!-- Mobile Card View -->
+          <div class="lg:hidden space-y-4">
+            <div
+              v-for="customer in filteredCustomers"
+              :key="customer.id"
+              class="bg-white rounded-xl p-4 border border-gray-200 relative"
+            >
+              <div class="flex items-start gap-3 mb-3">
+                <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span class="text-lg font-semibold text-primary">{{ customer.name.charAt(0) }}</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h3 class="font-medium text-gray-900 mb-1">{{ customer.name }}</h3>
+                  <span
+                    :class="[
+                      'inline-block px-2 py-1 text-xs rounded-full',
+                      customer.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                    ]"
+                  >
+                    {{ customer.status }}
+                  </span>
+                </div>
+                <div class="relative flex-shrink-0">
+                  <button
+                    @click="toggleCustomerActions(customer.id)"
+                    class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <MoreVertical :size="20" class="text-gray-600" />
+                  </button>
+                  
+                  <!-- Mobile Actions Dropdown -->
+                  <div
+                    v-if="showCustomerActions === customer.id"
+                    class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20"
+                  >
+                    <button
+                      @click="viewCustomerDetails(customer)"
+                      class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                    >
+                      <Eye :size="14" />
+                      View Details
+                    </button>
+                    <button
+                      @click="editCustomer(customer)"
+                      class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                    >
+                      <Edit2 :size="14" />
+                      Edit Customer
+                    </button>
+                    <button
+                      @click="viewCustomerOrders(customer)"
+                      class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                    >
+                      <ShoppingCart :size="14" />
+                      View Orders
+                    </button>
+                    <button
+                      @click="deleteCustomer(customer.id)"
+                      class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                    >
+                      <Trash2 :size="14" />
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="space-y-2 text-sm mb-3">
+                <div class="flex items-start gap-2 text-gray-600">
+                  <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  <span class="break-all flex-1">{{ customer.email }}</span>
+                </div>
+                <div class="flex items-center gap-2 text-gray-600">
+                  <Phone :size="16" class="flex-shrink-0" />
+                  <span>{{ customer.phone }}</span>
+                </div>
+                <div class="flex items-start gap-2 text-gray-600">
+                  <MapPin :size="16" class="flex-shrink-0 mt-0.5" />
+                  <span class="flex-1">{{ customer.location }}</span>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-3 pt-3 border-t border-gray-200 text-sm">
+                <div>
+                  <span class="text-gray-600">Orders:</span>
+                  <span class="font-semibold text-gray-900 ml-1">{{ customer.orders }}</span>
+                </div>
+                <div>
+                  <span class="text-gray-600">Joined:</span>
+                  <span class="text-gray-900 ml-1 text-xs">{{ formatDate(customer.joinDate) }}</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1084,47 +1277,85 @@
               </div>
 
               <div class="space-y-4">
-                <!-- Orders List -->
-                <div class="border border-gray-200 rounded-lg overflow-hidden">
-                  <table class="w-full">
-                    <thead class="bg-gray-50 border-b border-gray-200">
-                      <tr>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order #</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200">
-                      <tr v-for="order in customerOrders" :key="order.id" class="hover:bg-gray-50">
-                        <td class="px-4 py-3 font-medium text-gray-900">{{ order.orderNumber }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-600">{{ formatDate(order.createdAt) }}</td>
-                        <td class="px-4 py-3 text-sm font-semibold text-gray-900">₹{{ order.total.toFixed(2) }}</td>
-                        <td class="px-4 py-3">
-                          <span
-                            :class="[
-                              'px-2 py-1 text-xs rounded-full',
-                              order.status === 'delivered' ? 'bg-green-100 text-green-700' :
-                              order.status === 'shipped' ? 'bg-blue-100 text-blue-700' :
-                              order.status === 'processing' ? 'bg-yellow-100 text-yellow-700' :
-                              'bg-gray-100 text-gray-700'
-                            ]"
-                          >
-                            {{ order.status }}
-                          </span>
-                        </td>
-                        <td class="px-4 py-3">
-                          <button
-                            @click="viewOrder(order)"
-                            class="text-primary hover:text-primary/80 text-sm font-medium"
-                          >
-                            View
-                          </button>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+                <!-- Desktop Orders List -->
+                <div class="hidden md:block border border-gray-200 rounded-lg overflow-hidden">
+                  <div class="overflow-x-auto">
+                    <table class="w-full min-w-full">
+                      <thead class="bg-gray-50 border-b border-gray-200">
+                        <tr>
+                          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Order #</th>
+                          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Date</th>
+                          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Total</th>
+                          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Status</th>
+                          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-gray-200">
+                        <tr v-for="order in customerOrders" :key="order.id" class="hover:bg-gray-50">
+                          <td class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">{{ order.orderNumber }}</td>
+                          <td class="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">{{ formatDate(order.createdAt) }}</td>
+                          <td class="px-4 py-3 text-sm font-semibold text-gray-900 whitespace-nowrap">₹{{ order.total.toFixed(2) }}</td>
+                          <td class="px-4 py-3 whitespace-nowrap">
+                            <span
+                              :class="[
+                                'px-2 py-1 text-xs rounded-full',
+                                order.status === 'delivered' ? 'bg-green-100 text-green-700' :
+                                order.status === 'shipped' ? 'bg-blue-100 text-blue-700' :
+                                order.status === 'processing' ? 'bg-yellow-100 text-yellow-700' :
+                                'bg-gray-100 text-gray-700'
+                              ]"
+                            >
+                              {{ order.status }}
+                            </span>
+                          </td>
+                          <td class="px-4 py-3 whitespace-nowrap">
+                            <button
+                              @click="viewOrder(order)"
+                              class="text-primary hover:text-primary/80 text-sm font-medium"
+                            >
+                              View
+                            </button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <!-- Mobile Orders List -->
+                <div class="md:hidden space-y-3">
+                  <div
+                    v-for="order in customerOrders"
+                    :key="order.id"
+                    class="border border-gray-200 rounded-lg p-3"
+                  >
+                    <div class="flex items-start justify-between mb-2">
+                      <div>
+                        <p class="font-medium text-gray-900">{{ order.orderNumber }}</p>
+                        <p class="text-xs text-gray-600 mt-1">{{ formatDate(order.createdAt) }}</p>
+                      </div>
+                      <span
+                        :class="[
+                          'px-2 py-1 text-xs rounded-full flex-shrink-0',
+                          order.status === 'delivered' ? 'bg-green-100 text-green-700' :
+                          order.status === 'shipped' ? 'bg-blue-100 text-blue-700' :
+                          order.status === 'processing' ? 'bg-yellow-100 text-yellow-700' :
+                          'bg-gray-100 text-gray-700'
+                        ]"
+                      >
+                        {{ order.status }}
+                      </span>
+                    </div>
+                    <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+                      <span class="text-sm font-semibold text-gray-900">₹{{ order.total.toFixed(2) }}</span>
+                      <button
+                        @click="viewOrder(order)"
+                        class="text-sm text-primary hover:text-primary/80 font-medium"
+                      >
+                        View Details
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
                 <!-- Summary -->
@@ -2203,6 +2434,24 @@ export default {
   },
   
   methods: {
+    async loadAdminProfile() {
+      const { useAuthStore } = await import('@/stores/auth')
+      const authStore = useAuthStore()
+      
+      try {
+        // Fetch fresh admin data from API
+        await authStore.fetchUser()
+        
+        // Update admin profile display in header
+        if (authStore.user) {
+          // The user data is now updated from the API instead of mock data
+          console.log('Admin profile loaded:', authStore.user)
+        }
+      } catch (error) {
+        console.error('Failed to load admin profile:', error)
+      }
+    },
+    
     selectTab(tabId) {
       this.activeTab = tabId
       this.mobileSidebarOpen = false
@@ -2220,11 +2469,15 @@ export default {
       return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     },
     
-    handleLogout() {
-      // Clear any stored user data
-      localStorage.removeItem('user')
-      // Redirect to home page
-      this.$router.push('/')
+    async handleLogout() {
+      const { useAuthStore } = await import('@/stores/auth')
+      const { useToast } = await import('vue-toastification')
+      const authStore = useAuthStore()
+      const toast = useToast()
+      
+      await authStore.logout()
+      toast.success('Logged out successfully')
+      this.$router.push('/login-page')
     },
     
     handleClickOutside(event) {
@@ -2641,7 +2894,10 @@ export default {
     }
   },
   
-  mounted() {
+  async mounted() {
+    // Fetch real admin profile data
+    await this.loadAdminProfile()
+    
     // Add click outside listener
     document.addEventListener('click', this.handleClickOutside)
     // Initialize charts if analytics tab is already active

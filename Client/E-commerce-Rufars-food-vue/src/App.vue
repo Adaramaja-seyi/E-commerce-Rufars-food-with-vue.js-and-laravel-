@@ -9,8 +9,10 @@
 </template>
 
 <script>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useCartStore } from '@/stores/cart'
+import { useAuthStore } from '@/stores/auth'
 import Header from './components/Header.vue'
 import Footer from './components/Footer.vue'
 
@@ -24,6 +26,8 @@ export default {
   
   setup() {
     const route = useRoute()
+    const cartStore = useCartStore()
+    const authStore = useAuthStore()
     
     const isAdmin = computed(() => {
       return route.path.startsWith('/admin')
@@ -35,6 +39,13 @@ export default {
     
     const isAuthPage = computed(() => {
       return route.path === '/login' || route.path === '/signup'
+    })
+    
+    // Fetch cart on app mount if user is authenticated
+    onMounted(async () => {
+      if (authStore.isAuthenticated) {
+        await cartStore.fetchCart()
+      }
     })
     
     return {
