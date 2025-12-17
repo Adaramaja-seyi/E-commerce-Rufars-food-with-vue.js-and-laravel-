@@ -351,15 +351,26 @@ class AuthController extends Controller
     /**
      * Redirect to Google OAuth
      */
-    public function redirectToGoogle()
+    public function redirectToGoogle(Request $request)
     {
-        return Socialite::driver('google')->stateless()->redirect();
+        // Get redirect parameter and encode it in state
+        $redirect = $request->query('redirect');
+        
+        $driver = Socialite::driver('google')->stateless();
+        
+        // Use state parameter to pass redirect through OAuth flow
+        if ($redirect) {
+            $state = base64_encode(json_encode(['redirect' => $redirect]));
+            $driver->with(['state' => $state]);
+        }
+        
+        return $driver->redirect();
     }
 
     /**
      * Handle Google OAuth callback
      */
-    public function handleGoogleCallback()
+    public function handleGoogleCallback(Request $request)
     {
         try {
             $googleUser = Socialite::driver('google')->stateless()->user();
@@ -391,9 +402,27 @@ class AuthController extends Controller
             // Create token
             $token = $user->createToken('auth_token')->plainTextToken;
             
-            // Redirect to frontend with token
+            // Decode state parameter to get redirect
+            $redirect = null;
+            $state = $request->query('state');
+            if ($state) {
+                try {
+                    $decoded = json_decode(base64_decode($state), true);
+                    $redirect = $decoded['redirect'] ?? null;
+                } catch (\Exception $e) {
+                    // Invalid state, ignore
+                }
+            }
+            
+            // Redirect to frontend with token and optional redirect
             $frontendUrl = env('FRONTEND_URL', 'http://localhost:5173');
-            return redirect()->away("{$frontendUrl}/auth/google/callback?token={$token}");
+            $callbackUrl = "{$frontendUrl}/auth/google/callback?token={$token}";
+            
+            if ($redirect) {
+                $callbackUrl .= "&redirect=" . urlencode($redirect);
+            }
+            
+            return redirect()->away($callbackUrl);
             
         } catch (\Exception $e) {
             \Log::error('Google OAuth error: ' . $e->getMessage());

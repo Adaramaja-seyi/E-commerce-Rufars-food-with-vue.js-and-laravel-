@@ -678,22 +678,30 @@
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Card Number</label>
+            <div v-if="editingPayment && paymentForm.last4" class="mb-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <p class="text-sm text-gray-600">Current card: •••• •••• •••• {{ paymentForm.last4 }}</p>
+            </div>
             <input
               v-model="paymentForm.card_number"
               type="text"
-              placeholder="1234 5678 9012 3456"
+              :placeholder="editingPayment ? 'Enter new card number (leave empty to keep current)' : '1234 5678 9012 3456'"
               maxlength="19"
+              @input="formatCardNumber"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
+            <p v-if="editingPayment" class="text-xs text-gray-500 mt-1">
+              Leave empty to keep your current card ending in {{ paymentForm.last4 }}
+            </p>
           </div>
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Expiry Date</label>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Expiry Date *</label>
               <input
                 v-model="paymentForm.expiry"
                 type="text"
                 placeholder="MM/YY"
                 maxlength="5"
+                @input="formatExpiryDate"
                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
@@ -1099,10 +1107,11 @@ export default {
       if (payment) {
         this.paymentForm = {
           type: payment.type,
-          card_number: '•••• •••• •••• ' + payment.last4,
+          card_number: '',  // Empty so user can enter new card number
           expiry: payment.expiry || '',
           cvv: '',
-          is_default: payment.is_default
+          is_default: payment.is_default,
+          last4: payment.last4  // Store last4 for reference
         }
       } else {
         this.paymentForm = {
@@ -1122,19 +1131,50 @@ export default {
       this.editingPayment = null
     },
     
+    formatCardNumber(event) {
+      let value = event.target.value.replace(/\s/g, '')
+      value = value.replace(/\D/g, '')
+      const parts = value.match(/.{1,4}/g)
+      this.paymentForm.card_number = parts ? parts.join(' ') : value
+    },
+    
+    formatExpiryDate(event) {
+      let value = event.target.value.replace(/\D/g, '')
+      if (value.length >= 2) {
+        value = value.slice(0, 2) + '/' + value.slice(2, 4)
+      }
+      this.paymentForm.expiry = value
+    },
+    
     async savePayment() {
       const toast = useToast()
       this.loadingSave = true
       
       try {
-        // Extract last 4 digits
-        const last4 = this.paymentForm.card_number.replace(/\s/g, '').slice(-4)
+        // Validate card number if provided (required for new, optional for edit)
+        if (!this.editingPayment && !this.paymentForm.card_number) {
+          toast.error('Please enter a card number')
+          this.loadingSave = false
+          return
+        }
+        
+        // Validate expiry date
+        if (!this.paymentForm.expiry || this.paymentForm.expiry.length !== 5) {
+          toast.error('Please enter a valid expiry date (MM/YY)')
+          this.loadingSave = false
+          return
+        }
         
         const data = {
           type: this.paymentForm.type,
-          last4: last4,
           expiry: this.paymentForm.expiry,
           is_default: this.paymentForm.is_default
+        }
+        
+        // Only update card number if provided
+        if (this.paymentForm.card_number) {
+          const last4 = this.paymentForm.card_number.replace(/\s/g, '').slice(-4)
+          data.last4 = last4
         }
         
         let response

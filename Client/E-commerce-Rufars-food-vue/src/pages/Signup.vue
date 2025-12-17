@@ -113,7 +113,10 @@
         </div>
         
         <div class="mt-6 text-center">
-          <router-link :to="{name:'Login'}" class="text-primary hover:text-primary/80">
+          <router-link 
+            :to="{ name: 'Login', query: $route.query }" 
+            class="text-primary hover:text-primary/80"
+          >
             Already have an account? Sign in
           </router-link>
         </div>
@@ -193,9 +196,9 @@ export default {
           // Show success toast
           this.toast.success(result.message || 'Registration successful! Please login.')
           
-          // Redirect to login page
+          // Redirect to login page with redirect query preserved
           setTimeout(() => {
-            this.router.push({ name: 'Login' })
+            this.router.push({ name: 'Login', query: this.$route.query })
           }, 1500)
         } else {
           this.error = result.error || 'Signup failed. Please try again.'
@@ -210,8 +213,19 @@ export default {
     },
     
     handleGoogleSignup() {
-      // Redirect to backend Google OAuth
-      window.location.href = 'http://127.0.0.1:8000/api/auth/google'
+      // Preserve redirect query for Google OAuth
+      const redirect = this.$route.query.redirect
+      
+      // Store in sessionStorage as backup
+      if (redirect) {
+        sessionStorage.setItem('redirect_after_login', redirect)
+      }
+      
+      // Pass redirect to backend
+      const googleUrl = redirect 
+        ? `http://127.0.0.1:8000/api/auth/google?redirect=${encodeURIComponent(redirect)}`
+        : 'http://127.0.0.1:8000/api/auth/google'
+      window.location.href = googleUrl
     }
   }
 }

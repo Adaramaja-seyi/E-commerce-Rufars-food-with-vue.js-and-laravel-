@@ -95,7 +95,10 @@
         </div>
         
         <div class="mt-6 text-center">
-          <router-link :to="{name:'Signup'}" class="text-primary hover:text-primary/80">
+          <router-link 
+            :to="{ name: 'Signup', query: $route.query }" 
+            class="text-primary hover:text-primary/80"
+          >
             Don't have an account? Sign up
           </router-link>
         </div>
@@ -284,12 +287,10 @@ export default {
             // Admin goes to admin dashboard
             this.router.push('/admin/dashboard')
           } else {
-            // User goes to intended page, profile, or home
+            // User goes to intended page or profile
             const redirect = this.$route.query.redirect
             if (redirect) {
               this.router.push(redirect)
-            } else if (redirect === '/checkout') {
-              this.router.push('/checkout')
             } else {
               this.router.push('/profile')
             }
@@ -307,8 +308,19 @@ export default {
     },
     
     handleGoogleLogin() {
-      // Redirect to backend Google OAuth
-      window.location.href = 'http://127.0.0.1:8000/api/auth/google'
+      // Preserve redirect query for Google OAuth
+      const redirect = this.$route.query.redirect
+      
+      // Store in sessionStorage as backup
+      if (redirect) {
+        sessionStorage.setItem('redirect_after_login', redirect)
+      }
+      
+      // Pass redirect to backend
+      const googleUrl = redirect 
+        ? `http://127.0.0.1:8000/api/auth/google?redirect=${encodeURIComponent(redirect)}`
+        : 'http://127.0.0.1:8000/api/auth/google'
+      window.location.href = googleUrl
     },
     
     async handleForgotPassword() {

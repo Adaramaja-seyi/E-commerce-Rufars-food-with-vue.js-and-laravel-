@@ -28,6 +28,7 @@ export default {
     onMounted(async () => {
       const token = route.query.token
       const error = route.query.error
+      const redirectParam = route.query.redirect
       
       if (error) {
         message.value = 'Authentication failed'
@@ -57,12 +58,12 @@ export default {
             // Success!
             toast.success(`Welcome, ${result.user.name}!`)
             
-            // Redirect to intended page or home
-            const redirect = sessionStorage.getItem('redirect_after_login')
+            // Determine redirect: URL param > sessionStorage > home
+            let redirectTo = redirectParam || sessionStorage.getItem('redirect_after_login') || '/'
             sessionStorage.removeItem('redirect_after_login')
             
             setTimeout(() => {
-              router.push(redirect || '/')
+              router.push(redirectTo)
             }, 500)
           } else {
             throw new Error('Failed to fetch user data')

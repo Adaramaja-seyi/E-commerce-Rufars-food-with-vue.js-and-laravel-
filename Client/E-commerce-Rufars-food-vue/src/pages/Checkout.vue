@@ -229,17 +229,20 @@
                   </button>
                   <button
                     type="button"
-                    @click="paymentMethod = 'upi'"
+                    @click="paymentMethod = 'paystack'"
                     :class="[
                       'p-4 rounded-xl border-2 transition-all',
-                      paymentMethod === 'upi'
+                      paymentMethod === 'paystack'
                         ? 'border-primary bg-primary/5'
                         : 'border-border hover:border-primary/50'
                     ]"
                   >
                     <div class="flex items-center gap-2">
-                      <div class="w-5 h-5 bg-primary rounded"></div>
-                      <span class="font-medium">UPI</span>
+                      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20.5 12c0 4.7-3.8 8.5-8.5 8.5S3.5 16.7 3.5 12 7.3 3.5 12 3.5s8.5 3.8 8.5 8.5z"/>
+                        <path fill="white" d="M12 7v10M7 12h10"/>
+                      </svg>
+                      <span class="font-medium">Paystack</span>
                     </div>
                   </button>
                 </div>
@@ -254,7 +257,7 @@
                   </span>
                 </div>
                 <p class="text-sm text-muted-foreground">
-                  This is a demonstration checkout. In production, we'll integrate with Razorpay or PayPal for secure payments.
+                  This is a demonstration checkout. Card payments are simulated. Paystack integration is ready for production use.
                 </p>
               </div>
 
@@ -262,57 +265,112 @@
               <div v-if="paymentMethod === 'card'" class="space-y-4">
                 <div>
                   <label class="block text-sm font-medium text-foreground mb-2">
-                    Card Number
+                    Cardholder Name *
                   </label>
                   <input
+                    v-model="cardData.cardholderName"
                     type="text"
-                    placeholder="1234 5678 9012 3456"
-                    value="4242 4242 4242 4242"
+                    placeholder="Enter name on card"
                     class="w-full px-4 py-3 border border-border rounded-xl bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   />
+                  <p v-if="cardholderNameError" class="text-xs text-red-600 mt-1">
+                    {{ cardholderNameError }}
+                  </p>
                 </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-foreground mb-2">
+                    Card Number *
+                  </label>
+                  <div class="relative">
+                    <input
+                      v-model="cardData.cardNumber"
+                      type="text"
+                      placeholder="1234 5678 9012 3456"
+                      maxlength="19"
+                      @input="formatCardNumber"
+                      class="w-full px-4 py-3 border border-border rounded-xl bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    />
+                    <div v-if="detectedCardType" class="absolute right-3 top-1/2 -translate-y-1/2">
+                      <span class="text-sm font-medium text-primary">{{ detectedCardType }}</span>
+                    </div>
+                  </div>
+                  <p class="text-xs text-muted-foreground mt-1">
+                    Demo: Use 4242 4242 4242 4242 (Visa) or 5555 5555 5555 4444 (Mastercard)
+                  </p>
+                </div>
+                
                 <div class="grid grid-cols-2 gap-4">
                   <div>
                     <label class="block text-sm font-medium text-foreground mb-2">
-                      Expiry Date
+                      Expiry Date *
                     </label>
                     <input
+                      v-model="cardData.expiryDate"
                       type="text"
                       placeholder="MM/YY"
-                      value="12/25"
+                      maxlength="5"
+                      @input="formatExpiryDate"
                       class="w-full px-4 py-3 border border-border rounded-xl bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                     />
                   </div>
                   <div>
                     <label class="block text-sm font-medium text-foreground mb-2">
-                      CVV
+                      CVV *
                     </label>
                     <input
+                      v-model="cardData.cvv"
                       type="text"
                       placeholder="123"
-                      value="123"
+                      maxlength="4"
+                      @input="formatCVV"
                       class="w-full px-4 py-3 border border-border rounded-xl bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                     />
                   </div>
                 </div>
               </div>
 
-              <!-- UPI Payment -->
-              <div v-if="paymentMethod === 'upi'" class="space-y-4">
-                <div>
-                  <label class="block text-sm font-medium text-foreground mb-2">
-                    UPI ID
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="yourname@paytm"
-                    class="w-full px-4 py-3 border border-border rounded-xl bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                  />
-                </div>
-                <div class="bg-background rounded-xl p-4">
-                  <p class="text-sm text-muted-foreground">
-                    You'll be redirected to your UPI app to complete the payment.
-                  </p>
+              <!-- Paystack Payment -->
+              <div v-if="paymentMethod === 'paystack'" class="space-y-4">
+                <div class="bg-gradient-to-br from-primary/5 to-secondary/5 rounded-xl p-6 border border-primary/20">
+                  <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
+                      <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20.5 12c0 4.7-3.8 8.5-8.5 8.5S3.5 16.7 3.5 12 7.3 3.5 12 3.5s8.5 3.8 8.5 8.5z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 class="font-bold text-foreground">Paystack Payment</h4>
+                      <p class="text-sm text-muted-foreground">Secure payment gateway</p>
+                    </div>
+                  </div>
+                  
+                  <div class="space-y-3 mb-4">
+                    <div class="flex items-center gap-2 text-sm text-foreground">
+                      <svg class="w-4 h-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                      </svg>
+                      <span>Pay with card, bank transfer, or mobile money</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-sm text-foreground">
+                      <svg class="w-4 h-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                      </svg>
+                      <span>Secure and encrypted transactions</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-sm text-foreground">
+                      <svg class="w-4 h-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                      </svg>
+                      <span>Instant payment confirmation</span>
+                    </div>
+                  </div>
+                  
+                  <div class="bg-white/50 rounded-lg p-4">
+                    <p class="text-sm text-muted-foreground">
+                      <strong class="text-foreground">Demo Mode:</strong> When you click "Pay", you'll be redirected to Paystack's secure payment page. In production, this will process real payments.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -404,6 +462,7 @@
 import { ArrowLeft, CreditCard, Shield, Truck, CheckCircle, Lock } from 'lucide-vue-next'
 import Button from '@/components/ui/Button.vue'
 import { useCartStore } from '@/stores/cart'
+import { useToast } from 'vue-toastification'
 
 export default {
   name: 'Checkout',
@@ -430,10 +489,18 @@ export default {
         state: '',
         pincode: ''
       },
+      cardData: {
+        cardholderName: '',
+        cardNumber: '',
+        expiryDate: '',
+        cvv: ''
+      },
       paymentMethod: 'card',
       isProcessing: false,
       orderPlaced: false,
-      orderId: ''
+      orderId: '',
+      detectedCardType: '',
+      cardholderNameError: ''
     }
   },
   
@@ -478,32 +545,175 @@ export default {
         this.formData.city = authStore.user.city || ''
         this.formData.state = authStore.user.state || ''
         this.formData.pincode = authStore.user.pincode || ''
+        
+        // Pre-fill cardholder name with user's full name
+        this.cardData.cardholderName = authStore.user.name || ''
       }
     }
   },
   
   methods: {
-    async handleSubmit() {
+    detectCardType(cardNumber) {
+      const number = cardNumber.replace(/\s/g, '')
+      
+      // Visa: starts with 4
+      if (/^4/.test(number)) {
+        return 'Visa'
+      }
+      // Mastercard: starts with 51-55 or 2221-2720
+      if (/^5[1-5]/.test(number) || /^2(2[2-9][0-9]|[3-6][0-9]{2}|7[0-1][0-9]|720)/.test(number)) {
+        return 'Mastercard'
+      }
+      // American Express: starts with 34 or 37
+      if (/^3[47]/.test(number)) {
+        return 'American Express'
+      }
+      // Discover: starts with 6011, 622126-622925, 644-649, or 65
+      if (/^6011|^622[1-9]|^64[4-9]|^65/.test(number)) {
+        return 'Discover'
+      }
+      
+      return ''
+    },
+    
+    formatCardNumber(event) {
+      let value = event.target.value.replace(/\s/g, '')
+      value = value.replace(/\D/g, '')
+      const parts = value.match(/.{1,4}/g)
+      this.cardData.cardNumber = parts ? parts.join(' ') : value
+      
+      // Detect card type
+      this.detectedCardType = this.detectCardType(value)
+    },
+    
+    formatExpiryDate(event) {
+      let value = event.target.value.replace(/\D/g, '')
+      if (value.length >= 2) {
+        value = value.slice(0, 2) + '/' + value.slice(2, 4)
+      }
+      this.cardData.expiryDate = value
+    },
+    
+    formatCVV(event) {
+      this.cardData.cvv = event.target.value.replace(/\D/g, '')
+    },
+    
+    validateCardholderName() {
+      const fullName = `${this.formData.firstName} ${this.formData.lastName}`.trim().toLowerCase()
+      const cardholderName = this.cardData.cardholderName.trim().toLowerCase()
+      
+      if (!cardholderName) {
+        this.cardholderNameError = 'Cardholder name is required'
+        return false
+      }
+      
+      // Check if names match (allow some flexibility)
+      if (cardholderName !== fullName) {
+        // Check if cardholder name contains at least first or last name
+        const firstName = this.formData.firstName.toLowerCase()
+        const lastName = this.formData.lastName.toLowerCase()
+        
+        if (!cardholderName.includes(firstName) && !cardholderName.includes(lastName)) {
+          this.cardholderNameError = `Cardholder name should match your name: ${this.formData.firstName} ${this.formData.lastName}`
+          return false
+        }
+      }
+      
+      this.cardholderNameError = ''
+      return true
+    },
+    
+    validatePaymentDetails() {
+      if (this.paymentMethod === 'card') {
+        // Validate cardholder name
+        if (!this.validateCardholderName()) {
+          return this.cardholderNameError
+        }
+        
+        const cardNumber = this.cardData.cardNumber.replace(/\s/g, '')
+        if (!cardNumber || cardNumber.length < 13) {
+          return 'Please enter a valid card number'
+        }
+        if (!this.detectedCardType) {
+          return 'Please enter a valid card number from a supported card type'
+        }
+        if (!this.cardData.expiryDate || this.cardData.expiryDate.length !== 5) {
+          return 'Please enter a valid expiry date (MM/YY)'
+        }
+        if (!this.cardData.cvv || this.cardData.cvv.length < 3) {
+          return 'Please enter a valid CVV'
+        }
+      } else if (this.paymentMethod === 'paystack') {
+        // Paystack validation - no additional fields needed
+        // Payment will be processed through Paystack popup
+        return null
+      }
+      return null
+    },
+    
+    initializePaystack() {
+      const toast = useToast()
+      
+      // Check if PaystackPop is loaded
+      if (typeof window.PaystackPop === 'undefined') {
+        toast.error('Paystack is not loaded. Please refresh the page and try again.')
+        this.isProcessing = false
+        console.error('PaystackPop is not defined. Make sure the Paystack script is loaded in index.html')
+        return
+      }
+      
+      try {
+        // Convert amount to kobo (Paystack uses kobo, 1 Naira = 100 kobo)
+        const amountInKobo = this.total * 100
+        
+        const handler = window.PaystackPop.setup({
+          key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || 'pk_test_4830c11209bb97f1390dfe6694a96b93b1839aa1',
+          email: this.formData.email,
+          amount: amountInKobo,
+          currency: 'NGN',
+          ref: 'RUF_' + Math.floor((Math.random() * 1000000000) + 1),
+          metadata: {
+            custom_fields: [
+              {
+                display_name: "Customer Name",
+                variable_name: "customer_name",
+                value: `${this.formData.firstName} ${this.formData.lastName}`
+              },
+              {
+                display_name: "Phone Number",
+                variable_name: "phone_number",
+                value: this.formData.phone
+              }
+            ]
+          },
+          callback: (response) => {
+            // Payment successful
+            toast.success('Payment successful! Processing your order...')
+            this.createOrder(response.reference)
+          },
+          onClose: () => {
+            // Payment cancelled
+            toast.warning('Payment cancelled')
+            this.isProcessing = false
+          }
+        })
+        
+        handler.openIframe()
+      } catch (error) {
+        console.error('Paystack initialization error:', error)
+        toast.error('Failed to initialize payment. Please try again.')
+        this.isProcessing = false
+      }
+    },
+    
+    async createOrder(paymentReference = null) {
       const { useToast } = await import('vue-toastification')
       const { useAuthStore } = await import('@/stores/auth')
       const { ordersAPI } = await import('@/api')
       const toast = useToast()
       const authStore = useAuthStore()
       
-      this.isProcessing = true
-      
       try {
-        // Validate form
-        if (!this.formData.firstName || !this.formData.lastName || !this.formData.email || 
-            !this.formData.phone || !this.formData.address || !this.formData.city || 
-            !this.formData.state || !this.formData.pincode) {
-          toast.error('Please fill in all required fields')
-          this.isProcessing = false
-          return
-        }
-        
-        toast.info('Processing payment...')
-        
         // Update user profile with shipping information
         if (authStore.isAuthenticated) {
           const profileData = {
@@ -531,6 +741,7 @@ export default {
             pincode: this.formData.pincode
           },
           payment_method: this.paymentMethod,
+          payment_reference: paymentReference,
           notes: ''
         }
         
@@ -550,9 +761,51 @@ export default {
           toast.error(response.data.message || 'Failed to create order')
         }
       } catch (error) {
+        console.error('Order creation error:', error)
+        toast.error(error.response?.data?.message || 'Failed to create order. Please try again.')
+      } finally {
+        this.isProcessing = false
+      }
+    },
+    
+    async handleSubmit() {
+      const { useToast } = await import('vue-toastification')
+      const toast = useToast()
+      
+      this.isProcessing = true
+      
+      try {
+        // Validate form
+        if (!this.formData.firstName || !this.formData.lastName || !this.formData.email || 
+            !this.formData.phone || !this.formData.address || !this.formData.city || 
+            !this.formData.state || !this.formData.pincode) {
+          toast.error('Please fill in all required fields')
+          this.isProcessing = false
+          return
+        }
+        
+        // Validate payment details
+        const paymentError = this.validatePaymentDetails()
+        if (paymentError) {
+          toast.error(paymentError)
+          this.isProcessing = false
+          return
+        }
+        
+        // Handle Paystack payment
+        if (this.paymentMethod === 'paystack') {
+          toast.info('Opening Paystack payment...')
+          this.initializePaystack()
+          return
+        }
+        
+        // Handle card payment (demo mode)
+        toast.info('Processing payment...')
+        await this.createOrder()
+        
+      } catch (error) {
         console.error('Checkout error:', error)
         toast.error(error.response?.data?.message || 'Failed to process order. Please try again.')
-      } finally {
         this.isProcessing = false
       }
     }
